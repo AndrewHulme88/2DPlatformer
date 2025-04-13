@@ -47,6 +47,12 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
+    public void KillInstantly()
+    {
+        currentHealth = 1;
+        Die();
+    }
+
     private IEnumerator RespawnAfterDelay()
     {
         isRespawning = true;
