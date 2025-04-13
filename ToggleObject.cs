@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class ToggleObject : MonoBehaviour
 {
-    [SerializeField] ToggleState currentState = ToggleState.Active;
-
+    private bool isActive = true;
     private SpriteRenderer spriteRenderer;
     private Collider2D col;
 
@@ -11,30 +10,33 @@ public class ToggleObject : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         col = GetComponent<Collider2D>();
-        ApplyState();
     }
 
-    public void Trigger()
+    public void Activate()
     {
-        if(currentState == ToggleState.Toggled)
-        {
-            currentState = spriteRenderer.enabled ? ToggleState.Inactive : ToggleState.Active;
-        }
-
-        ApplyState();
+        SetActive(true);
     }
-    
-    private void ApplyState()
-    {
-        bool isVisible = (currentState == ToggleState.Active);
-        if(spriteRenderer != null)
-        {
-            spriteRenderer.enabled = isVisible;
-        }
 
-        if(col != null)
+    public void Deactivate()
+    {
+        SetActive(false);
+    }
+
+    public void Toggle()
+    {
+        SetActive(!isActive);
+    }
+
+    private void SetActive(bool state)
+    {
+        isActive = state;
+        if (spriteRenderer != null)
         {
-            col.enabled = isVisible;
+            spriteRenderer.enabled = isActive;
+        }
+        if (col != null)
+        {
+            col.enabled = isActive;
         }
     }
 }
