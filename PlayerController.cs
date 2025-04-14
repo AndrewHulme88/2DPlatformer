@@ -11,6 +11,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask groundLayer;
     [SerializeField] float climbSpeed = 3f;
 
+    public bool canMove = true;
+    public float startingGravity;
+
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
     private Animator anim;
@@ -21,7 +24,6 @@ public class PlayerController : MonoBehaviour
     private bool onLadder = false;
     public bool isClimbing = false;
     private float verticalInput;
-    private float startingGravity;
 
     private void Start()
     {
@@ -33,6 +35,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (!canMove) return;
+
         moveInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
