@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
 
     public bool canMove = true;
     public float startingGravity;
+    public bool isFacingRight = true;
 
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
@@ -43,7 +44,8 @@ public class PlayerController : MonoBehaviour
 
         if(moveInput != 0)
         {
-            spriteRenderer.flipX = moveInput < 0;
+            isFacingRight = moveInput > 0;
+            spriteRenderer.flipX = !isFacingRight;
         }
 
         if(isGrounded)
