@@ -6,6 +6,8 @@ public class Bullet : MonoBehaviour
     [SerializeField] float speed = 10f;
     [SerializeField] float lifeTime = 2f;
 
+    public int damageAmount = 1;
+
     private Vector2 direcion;
 
     public void Initialize(Vector2 dir)
@@ -21,9 +23,14 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision != null)
+        EnemyHealth enemy = collision.GetComponent<EnemyHealth>();
+
+
+        if(enemy != null)
         {
-            Destroy(this.gameObject);
+            enemy.TakeDamage(damageAmount);
         }
+
+        Destroy(gameObject);
     }
 }

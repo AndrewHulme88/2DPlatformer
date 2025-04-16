@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -18,6 +19,7 @@ public class PlayerController : MonoBehaviour
     public float startingGravity;
     public bool isFacingRight = true;
     public Vector2 aimDirection = Vector2.right;
+    public bool hasGun = false;
 
     private Rigidbody2D rb;
     private Animator anim;
@@ -26,8 +28,10 @@ public class PlayerController : MonoBehaviour
     private float jumpBufferTimer;
     private float coyoteTimer;
     private bool onLadder = false;
+    private bool climbStarted = false;
     public bool isClimbing = false;
     private float verticalInput;
+    private bool atLadderExit = false;
 
     private void Start()
     {
@@ -44,8 +48,31 @@ public class PlayerController : MonoBehaviour
         verticalInput = Input.GetAxisRaw("Vertical");
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
         isAimingLocked = Input.GetKey(aimLockKey);
+        aimDirection.x = Input.GetAxisRaw("Horizontal");
+        aimDirection.y = Input.GetAxisRaw("Vertical");
+        int aimIndex = 0;
 
-        if(moveInput != 0)
+        isClimbing = (onLadder && Input.GetButton("Climb")) ? true : false;
+
+        if(isClimbing && !climbStarted)
+        {
+            climbStarted = true;
+        }
+        else if(!isClimbing && climbStarted)
+        {
+            ResetClimbing();
+        }
+
+        if(isClimbing && atLadderExit)
+        {
+            if(verticalInput > 0 || verticalInput < 0)
+            {
+                isClimbing = false;
+                ResetClimbing();
+            }
+        }
+
+        if (moveInput != 0)
         {
             isFacingRight = moveInput > 0;
             Vector3 scale = transform.localScale;
@@ -86,45 +113,81 @@ public class PlayerController : MonoBehaviour
             aimDirection = new Vector2(moveInput, verticalInput).normalized;
         }
 
-        isClimbing = onLadder && Mathf.Abs(verticalInput) > 0;
-
         if(!isAimingLocked)
         {
             anim.SetFloat("moveX", Mathf.Abs(moveInput));
         }
 
+        if(aimDirection.y > 0.5f && Mathf.Abs(aimDirection.x) > 0.5f)
+        {
+            aimIndex = 3; // Diagonal Up
+        }
+        else if(aimDirection.y < -0.5f && Mathf.Abs(aimDirection.x) > 0.5f)
+        {
+            aimIndex = 4; // Diagonal Down
+        }
+        else if(aimDirection.y > 0.5f)
+        {
+            aimIndex = 1; // Up
+        }
+        else if(aimDirection.y < -0.5f)
+        {
+            aimIndex = 2; // Down
+        }
+        else
+        {
+            aimIndex = 0; // Forward
+        }
+
+        if(aimDirection == Vector2.zero)
+        {
+            aimDirection = isFacingRight ? Vector2.right : Vector2.left;
+        }
+
+        anim.SetBool("isClimbing", isClimbing);
         anim.SetFloat("velocityY", rb.linearVelocity.y);
         anim.SetBool("isGrounded", isGrounded);
-        anim.SetBool("isClimbing", onLadder);
+        anim.SetBool("hasGun", hasGun);
+        anim.SetInteger("aimDirectionIndex", aimIndex);
     }
 
     private void FixedUpdate()
     {
         if(onLadder)
-        { 
-            rb.gravityScale = 0;
-
-            if(Mathf.Abs(verticalInput) > 0)
+        {
+            if(climbStarted && !isClimbing)
             {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, verticalInput * climbSpeed);
+                if (moveInput > 0.1f || moveInput < -0.1f)
+                {
+                    ResetClimbing();
+                }
             }
-            else
+            else if(climbStarted && isClimbing)
             {
-                rb.linearVelocity = new Vector2(moveInput * moveSpeed, 0);
+                rb.bodyType = RigidbodyType2D.Kinematic;
+
+                Vector3 newPos = transform.position;
+                newPos.y += verticalInput * climbSpeed * Time.deltaTime;
+                rb.MovePosition(newPos);
             }
         }
-        else
-        {
-            rb.gravityScale = startingGravity;
 
-            if(!isAimingLocked)
-            {
-                rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
-            }
+        if(!isAimingLocked)
+        {
+            rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void ResetClimbing()
+    {
+        if(climbStarted)
+        {
+            climbStarted = false;
+            rb.bodyType = RigidbodyType2D.Dynamic;
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
     {
         if(collision.CompareTag("Ladder"))
         {
@@ -132,8 +195,20 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.CompareTag("LadderExit"))
+        {
+            atLadderExit = true;
+        }
+    }
+
     private void OnTriggerExit2D(Collider2D collision)
     {
+        if(collision.CompareTag("LadderExit"))
+        {
+            atLadderExit = false;
+        }
         if(collision.CompareTag("Ladder"))
         {
             onLadder = false;

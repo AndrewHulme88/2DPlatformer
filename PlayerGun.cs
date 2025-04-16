@@ -20,9 +20,11 @@ public class PlayerGun : MonoBehaviour
         firePoint.right = playerController.aimDirection;
 
         if (Input.GetKey(fireKey) && Time.time >= lastFireTime + fireRate)
-
         {
-            Fire();
+            if(playerController.hasGun)
+            {
+                Fire();
+            }
         }
     }
 
