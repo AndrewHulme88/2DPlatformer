@@ -10,13 +10,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float groundCheckRadius = 0.1f;
     [SerializeField] LayerMask groundLayer;
     [SerializeField] float climbSpeed = 3f;
+    [SerializeField] KeyCode aimLockKey = KeyCode.LeftShift;
+
+    [HideInInspector] public bool isAimingLocked = false;
 
     public bool canMove = true;
     public float startingGravity;
     public bool isFacingRight = true;
+    public Vector2 aimDirection = Vector2.right;
 
     private Rigidbody2D rb;
-    private SpriteRenderer spriteRenderer;
     private Animator anim;
     private bool isGrounded;
     private float moveInput;
@@ -29,7 +32,6 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         startingGravity = rb.gravityScale;
     }
@@ -41,11 +43,14 @@ public class PlayerController : MonoBehaviour
         moveInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        isAimingLocked = Input.GetKey(aimLockKey);
 
         if(moveInput != 0)
         {
             isFacingRight = moveInput > 0;
-            spriteRenderer.flipX = !isFacingRight;
+            Vector3 scale = transform.localScale;
+            scale.x = isFacingRight ? 1 : -1;
+            transform.localScale = scale;
         }
 
         if(isGrounded)
@@ -72,9 +77,22 @@ public class PlayerController : MonoBehaviour
             jumpBufferTimer = 0;
         }
 
+        if(!isGrounded && verticalInput < 0)
+        {
+            aimDirection = new Vector2(moveInput, -1).normalized;
+        }
+        else if(verticalInput != 0 || moveInput != 0)
+        {
+            aimDirection = new Vector2(moveInput, verticalInput).normalized;
+        }
+
         isClimbing = onLadder && Mathf.Abs(verticalInput) > 0;
 
-        anim.SetFloat("moveX", Mathf.Abs(moveInput));
+        if(!isAimingLocked)
+        {
+            anim.SetFloat("moveX", Mathf.Abs(moveInput));
+        }
+
         anim.SetFloat("velocityY", rb.linearVelocity.y);
         anim.SetBool("isGrounded", isGrounded);
         anim.SetBool("isClimbing", onLadder);
@@ -98,7 +116,11 @@ public class PlayerController : MonoBehaviour
         else
         {
             rb.gravityScale = startingGravity;
-            rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+
+            if(!isAimingLocked)
+            {
+                rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+            }
         }
     }
 
