@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -32,6 +33,7 @@ public class PlayerController : MonoBehaviour
     public bool isClimbing = false;
     private float verticalInput;
     private bool atLadderExit = false;
+    private MovingPlatform movingPlatform;
 
     private void Start()
     {
@@ -175,6 +177,16 @@ public class PlayerController : MonoBehaviour
         if(!isAimingLocked)
         {
             rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+
+        }
+        else
+        {
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        }
+
+        if (movingPlatform != null)
+        {
+            rb.position += (Vector2)movingPlatform.PlatformVelocity * Time.deltaTime;
         }
     }
 
@@ -197,21 +209,22 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.CompareTag("LadderExit"))
+        if(collision.CompareTag("MovingPlatform"))
         {
-            atLadderExit = true;
+            movingPlatform = collision.GetComponent<MovingPlatform>();
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if(collision.CompareTag("LadderExit"))
-        {
-            atLadderExit = false;
-        }
         if(collision.CompareTag("Ladder"))
         {
             onLadder = false;
+        }
+
+        if(collision.CompareTag("MovingPlatform"))
+        {
+            movingPlatform = null;
         }
     }
 }
