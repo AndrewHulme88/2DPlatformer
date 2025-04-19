@@ -45,7 +45,7 @@ public class EnemyCrawler : MonoBehaviour
     {
         float rotationAmount = moveClockwise ? -90f : 90f;
         transform.Rotate(0, 0, rotationAmount);
-        Vector3 offset = transform.up * 0.5f;
+        Vector3 offset = transform.up * 1f;
         transform.position += offset;
     }
 }

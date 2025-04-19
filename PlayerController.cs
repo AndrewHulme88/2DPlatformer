@@ -11,7 +11,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform groundCheck;
     [SerializeField] float groundCheckRadius = 0.1f;
     [SerializeField] LayerMask groundLayer;
-    [SerializeField] float climbSpeed = 3f;
     [SerializeField] KeyCode aimLockKey = KeyCode.LeftShift;
 
     [HideInInspector] public bool isAimingLocked = false;
@@ -20,7 +19,6 @@ public class PlayerController : MonoBehaviour
     public float startingGravity;
     public bool isFacingRight = true;
     public Vector2 aimDirection = Vector2.right;
-    public bool hasGun = false;
 
     private Rigidbody2D rb;
     private Animator anim;
@@ -28,11 +26,7 @@ public class PlayerController : MonoBehaviour
     private float moveInput;
     private float jumpBufferTimer;
     private float coyoteTimer;
-    private bool onLadder = false;
-    private bool climbStarted = false;
-    public bool isClimbing = false;
     private float verticalInput;
-    private bool atLadderExit = false;
     private MovingPlatform movingPlatform;
 
     private void Start()
@@ -53,26 +47,6 @@ public class PlayerController : MonoBehaviour
         aimDirection.x = Input.GetAxisRaw("Horizontal");
         aimDirection.y = Input.GetAxisRaw("Vertical");
         int aimIndex = 0;
-
-        isClimbing = (onLadder && Input.GetButton("Climb")) ? true : false;
-
-        if(isClimbing && !climbStarted)
-        {
-            climbStarted = true;
-        }
-        else if(!isClimbing && climbStarted)
-        {
-            ResetClimbing();
-        }
-
-        if(isClimbing && atLadderExit)
-        {
-            if(verticalInput > 0 || verticalInput < 0)
-            {
-                isClimbing = false;
-                ResetClimbing();
-            }
-        }
 
         if (moveInput != 0)
         {
@@ -146,34 +120,13 @@ public class PlayerController : MonoBehaviour
             aimDirection = isFacingRight ? Vector2.right : Vector2.left;
         }
 
-        anim.SetBool("isClimbing", isClimbing);
         anim.SetFloat("velocityY", rb.linearVelocity.y);
         anim.SetBool("isGrounded", isGrounded);
-        anim.SetBool("hasGun", hasGun);
         anim.SetInteger("aimDirectionIndex", aimIndex);
     }
 
     private void FixedUpdate()
     {
-        if(onLadder)
-        {
-            if(climbStarted && !isClimbing)
-            {
-                if (moveInput > 0.1f || moveInput < -0.1f)
-                {
-                    ResetClimbing();
-                }
-            }
-            else if(climbStarted && isClimbing)
-            {
-                rb.bodyType = RigidbodyType2D.Kinematic;
-
-                Vector3 newPos = transform.position;
-                newPos.y += verticalInput * climbSpeed * Time.deltaTime;
-                rb.MovePosition(newPos);
-            }
-        }
-
         if(!isAimingLocked)
         {
             rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
@@ -190,23 +143,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void ResetClimbing()
-    {
-        if(climbStarted)
-        {
-            climbStarted = false;
-            rb.bodyType = RigidbodyType2D.Dynamic;
-        }
-    }
-
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        if(collision.CompareTag("Ladder"))
-        {
-            onLadder = true;
-        }
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if(collision.CompareTag("MovingPlatform"))
@@ -217,11 +153,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if(collision.CompareTag("Ladder"))
-        {
-            onLadder = false;
-        }
-
         if(collision.CompareTag("MovingPlatform"))
         {
             movingPlatform = null;

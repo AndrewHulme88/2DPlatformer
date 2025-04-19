@@ -21,10 +21,7 @@ public class PlayerGun : MonoBehaviour
 
         if (Input.GetKey(fireKey) && Time.time >= lastFireTime + fireRate)
         {
-            if(playerController.hasGun)
-            {
-                Fire();
-            }
+            Fire();
         }
     }
 
