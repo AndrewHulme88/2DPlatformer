@@ -23,12 +23,12 @@ public class EnemyWallPatroller : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
 
-        if(wallSide == WallSide.Left)
-        {
-            Vector3 scale = transform.localScale;
-            scale.x *= -1;
-            transform.localScale = scale;
-        }
+        //if(wallSide == WallSide.Left)
+        //{
+        //    Vector3 scale = transform.localScale;
+        //    scale.x *= -1;
+        //    transform.localScale = scale;
+        //}
     }
 
     private void FixedUpdate()

@@ -3,78 +3,57 @@ using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
-    [SerializeField] float respawnDelay = 1f;
-    [SerializeField] int maxHealth = 3;
+    [SerializeField] int maxHealth = 5;
+    [SerializeField] float invicibilityTimer = 1f;
     
+    public bool isInvincible = false;
+
     private int currentHealth;
-    private Vector3 respawnPoint;
-    private bool isRespawning = false;
-    private SpriteRenderer spriteRenderer;
-    private Rigidbody2D rb;
-    private Collider2D col;
-    private PlayerController controller;
 
     public int GetCurrentHealth() => currentHealth;
     public int GetMaxHealth() => maxHealth;
 
-    private void Awake()
-    {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<Collider2D>();
-        controller = GetComponent<PlayerController>();
-    }
-
     private void Start()
     {
         currentHealth = maxHealth;
-        respawnPoint = transform.position;
     }
 
-    public void Die()
+    public void TakeDamage(int amount)
     {
-        if (isRespawning) return;
+        if (isInvincible || currentHealth <= 0) return;
 
-        currentHealth--;
+        currentHealth -= amount;
 
-        if(currentHealth > 0)
+        if(currentHealth <= 0)
         {
-            StartCoroutine(RespawnAfterDelay());
+            Die();
         }
         else
         {
-            Debug.Log("Game Over - return to save point (not implemented)");
+            StartCoroutine(InvincibilityFlash());
         }
     }
 
-    public void KillInstantly()
+    private void Die()
     {
-        currentHealth = 1;
-        Die();
+        Debug.Log("Player died");
     }
 
-    private IEnumerator RespawnAfterDelay()
+    private IEnumerator InvincibilityFlash()
     {
-        isRespawning = true;
-        spriteRenderer.enabled = false;
-        rb.linearVelocity = Vector2.zero;
-        rb.simulated = false;
-        col.enabled = false;
-        controller.enabled = false;
+        isInvincible = true;
 
-        yield return new WaitForSeconds(respawnDelay);
+        float timeElapsed = 0f;
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
 
-        transform.position = respawnPoint;
-        spriteRenderer.enabled = true;
-        rb.simulated = true;
-        col.enabled = true;
-        controller.enabled = true;
+        while(timeElapsed < invicibilityTimer)
+        {
+            sr.enabled = !sr.enabled;
+            yield return new WaitForSeconds(0.1f);
+            timeElapsed += 0.1f;
+        }
 
-        isRespawning = false;
-    }
-
-    public void SetRespawnPoint(Vector3 newPoint)
-    {
-        respawnPoint = newPoint;
+        sr.enabled = true;
+        isInvincible = false;
     }
 }

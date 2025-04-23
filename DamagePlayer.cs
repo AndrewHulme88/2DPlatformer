@@ -3,7 +3,6 @@ using UnityEngine;
 public class DamagePlayer : MonoBehaviour
 {
     [SerializeField] int damageAmount = 1;
-    [SerializeField] bool instantKill = false;
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -15,22 +14,20 @@ public class DamagePlayer : MonoBehaviour
         TryDamage(collision);
     }
 
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        TryDamage(collision);
+    }
+
     private void TryDamage(Collider2D collider)
     {
         if (!collider.CompareTag("Player")) return;
 
         PlayerHealth health = collider.GetComponent<PlayerHealth>();
 
-        if(health != null)
+        if(health != null && !health.isInvincible)
         {
-            if(instantKill)
-            {
-                health.KillInstantly();
-            }
-            else
-            {
-                health.Die();
-            }
+            health.TakeDamage(damageAmount);
         }
     }
 }

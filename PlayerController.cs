@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float groundCheckRadius = 0.1f;
     [SerializeField] LayerMask groundLayer;
     [SerializeField] KeyCode aimLockKey = KeyCode.LeftShift;
+    [SerializeField] KeyCode crouchKey = KeyCode.DownArrow;
+    [SerializeField] BoxCollider2D standingCollider;
+    [SerializeField] CapsuleCollider2D crouchingCollider;
 
     [HideInInspector] public bool isAimingLocked = false;
 
@@ -19,6 +22,7 @@ public class PlayerController : MonoBehaviour
     public float startingGravity;
     public bool isFacingRight = true;
     public Vector2 aimDirection = Vector2.right;
+    public bool isCrouching = false;
 
     private Rigidbody2D rb;
     private Animator anim;
@@ -47,6 +51,10 @@ public class PlayerController : MonoBehaviour
         aimDirection.x = Input.GetAxisRaw("Horizontal");
         aimDirection.y = Input.GetAxisRaw("Vertical");
         int aimIndex = 0;
+        isCrouching = Input.GetKey(crouchKey) && isGrounded;
+
+        standingCollider.enabled = !isCrouching;
+        crouchingCollider.enabled = isCrouching;
 
         if (moveInput != 0)
         {
@@ -106,7 +114,7 @@ public class PlayerController : MonoBehaviour
         {
             aimIndex = 1; // Up
         }
-        else if(aimDirection.y < -0.5f)
+        else if (aimDirection.y < -0.5f && !isGrounded)
         {
             aimIndex = 2; // Down
         }
@@ -120,14 +128,22 @@ public class PlayerController : MonoBehaviour
             aimDirection = isFacingRight ? Vector2.right : Vector2.left;
         }
 
+        if(isCrouching)
+        {
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+            aimDirection = isFacingRight ? Vector2.right : Vector2.left;
+            aimIndex = 0;
+        }
+
         anim.SetFloat("velocityY", rb.linearVelocity.y);
         anim.SetBool("isGrounded", isGrounded);
         anim.SetInteger("aimDirectionIndex", aimIndex);
+        anim.SetBool("isCrouching", isCrouching);
     }
 
     private void FixedUpdate()
     {
-        if(!isAimingLocked)
+        if(!isAimingLocked && !isCrouching)
         {
             rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
 
