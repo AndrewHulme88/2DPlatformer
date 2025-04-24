@@ -18,6 +18,11 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    public void Heal(int healAmount)
+    {
+        currentHealth = Mathf.Clamp(currentHealth + healAmount, 0, maxHealth);
+    }
+
     public void TakeDamage(int amount)
     {
         if (isInvincible || currentHealth <= 0) return;

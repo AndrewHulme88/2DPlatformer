@@ -51,7 +51,7 @@ public class PlayerController : MonoBehaviour
         aimDirection.x = Input.GetAxisRaw("Horizontal");
         aimDirection.y = Input.GetAxisRaw("Vertical");
         int aimIndex = 0;
-        isCrouching = Input.GetKey(crouchKey) && isGrounded;
+        isCrouching = Input.GetKey(crouchKey) && isGrounded && moveInput == 0;
 
         standingCollider.enabled = !isCrouching;
         crouchingCollider.enabled = isCrouching;

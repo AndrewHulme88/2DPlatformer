@@ -22,7 +22,6 @@ public class PlayerGun : MonoBehaviour
     private PlayerController playerController;
     private float chargeTimer = 0f;
     private bool isCharging = false;
-    private bool canFire = true;
 
     private void Awake()
     {
@@ -38,7 +37,6 @@ public class PlayerGun : MonoBehaviour
         {
             isCharging = true;
             chargeTimer = 0f;
-            canFire = false;
         }
 
         if(unlockChargeShot && isCharging)
@@ -48,7 +46,6 @@ public class PlayerGun : MonoBehaviour
             if(Input.GetKeyUp(fireKey))
             {
                 isCharging = false;
-                canFire = true;
 
                 if(chargeTimer >= chargeTime)
                 {
@@ -99,5 +96,15 @@ public class PlayerGun : MonoBehaviour
         Transform firePoint = playerController.isCrouching ? firePointCrouching : firePointStanding;
         GameObject bullet = Instantiate(chargeShotPrefab, firePoint.position, Quaternion.identity);
         bullet.GetComponent<Bullet>().Initialize(playerController.aimDirection.normalized);
+    }
+
+    public void UnlockChargeShot()
+    {
+        unlockChargeShot = true;
+    }
+
+    public void UnlockSpreadShot()
+    {
+        unlockSpreadShot = true;
     }
 }
