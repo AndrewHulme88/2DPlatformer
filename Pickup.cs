@@ -7,6 +7,7 @@ public class Pickup : MonoBehaviour
 
     [SerializeField] PickupType pickupType;
     [SerializeField] int healAmount = 1;
+    [SerializeField] GameObject pickupParticles;
 
     private Animator anim;
 
@@ -21,6 +22,11 @@ public class Pickup : MonoBehaviour
 
         PlayerHealth player = collision.GetComponent<PlayerHealth>();
         PlayerGun gun = collision.GetComponent<PlayerGun>();
+
+        if(pickupParticles != null)
+        {
+            Instantiate(pickupParticles, transform.position, Quaternion.identity);
+        }
 
         switch (pickupType)
         {
