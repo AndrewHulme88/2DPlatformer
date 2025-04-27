@@ -23,6 +23,12 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth + healAmount, 0, maxHealth);
     }
 
+    public void IncreaseMaxHealth(int amount)
+    {
+        maxHealth += amount;
+        currentHealth = maxHealth;
+    }
+
     public void TakeDamage(int amount)
     {
         if (isInvincible || currentHealth <= 0) return;

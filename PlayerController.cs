@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public string CurrentRoom { get; set; }
+
     [SerializeField] float moveSpeed = 5f;
     [SerializeField] float jumpForce = 10f;
     [SerializeField] float coyoteTime = 0.2f;

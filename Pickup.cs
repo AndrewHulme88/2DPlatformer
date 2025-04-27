@@ -3,17 +3,25 @@ using UnityEngine;
 
 public class Pickup : MonoBehaviour
 {
-    public enum PickupType { Health, ChargeShot, SpreadShot }
+    public enum PickupType { Health, ChargeShot, SpreadShot, MaxHealth }
 
     [SerializeField] PickupType pickupType;
     [SerializeField] int healAmount = 1;
     [SerializeField] GameObject pickupParticles;
-
+    [SerializeField] bool doesDisappear = false;
+    [SerializeField] float lifetimeAfterDrop = 10f;
+    [SerializeField] int healthIncreaseAmount = 1;
+     
     private Animator anim;
 
     private void Start()
     {
         anim = GetComponent<Animator>();
+
+        if(doesDisappear)
+        {
+            Destroy(gameObject, lifetimeAfterDrop);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -45,6 +53,15 @@ public class Pickup : MonoBehaviour
                 if(gun != null)
                 {
                     gun.UnlockSpreadShot();
+                }
+                break;
+
+            case PickupType.MaxHealth:
+                if(player != null)
+                {
+                    player.IncreaseMaxHealth(healthIncreaseAmount);
+                    UI ui = FindFirstObjectByType<UI>();
+                    ui.UpdateHealthUI();
                 }
                 break;
         }

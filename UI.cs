@@ -15,7 +15,7 @@ public class UI : MonoBehaviour
     {
         int max = playerHealth.GetMaxHealth();
 
-        for(int i = 0; i < max; i++)
+        for (int i = 0; i < max; i++)
         {
             GameObject heart = Instantiate(heartTemplate, transform);
             heart.SetActive(true);
@@ -32,6 +32,26 @@ public class UI : MonoBehaviour
         for(int i = 0; i < heartImages.Count; i++)
         {
             heartImages[i].sprite = i < current ? fullHeartSprite : emptyHeartSprite;
+        }
+    }
+
+    public void UpdateHealthUI()
+    {
+        foreach(var heart in heartImages)
+        {
+            Destroy(heart.gameObject);
+        }
+
+        heartImages.Clear();
+        int max = playerHealth.GetMaxHealth();
+
+        for(int i = 0; i < max; i++)
+        {
+            GameObject heart = Instantiate(heartTemplate, transform);
+            heart.SetActive(true);
+
+            Image img = heart.GetComponent<Image>();
+            heartImages.Add(img);
         }
     }
 }
